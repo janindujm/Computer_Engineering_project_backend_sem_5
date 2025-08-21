@@ -39,6 +39,13 @@ functions:
 
   turnOffDevice:
     handler: handlers/turnOffDevice.turnOffDevice
+  
+  sendCommand:
+    handler: handlers/sendCommand.sendCommand
+    events:
+      - httpApi:
+          path: /device/command
+          method: post
 
 resources:
   Resources:
