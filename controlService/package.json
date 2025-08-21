@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.872.0",
+    "@aws-sdk/client-iot-data-plane": "^3.872.0",
+    "@aws-sdk/client-scheduler": "^3.872.0",
+    "uuid": "^11.1.0"
+  }
+}

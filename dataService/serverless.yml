@@ -1,0 +1,35 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: greet
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: dataService
+
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    DYNAMODB_TABLE: EnergytableV2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:query
+      Resource:
+        - "arn:aws:dynamodb:us-east-1:*:table/EnergytableV2"
+
+functions:
+  getLatestData:
+    handler: handlers/getLatestData.getLatestData
+    events:
+      - httpApi:
+          path: /devices/latest
+          method: get
+  
+  getDayData:
+    handler: handlers/getDayData.getDayData
+    events:
+      - httpApi:
+          path: /devices/day
+          method: get
+          
