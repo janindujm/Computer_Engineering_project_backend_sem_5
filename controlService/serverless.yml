@@ -40,6 +40,15 @@ functions:
   turnOffDevice:
     handler: handlers/turnOffDevice.turnOffDevice
   
+
+  turnOnDevice:
+    handler: handlers/turnOnDevice.turnOnDevice
+    events:
+      - httpApi:
+          path: /device/on
+          method: post
+
+  
   sendCommand:
     handler: handlers/sendCommand.sendCommand
     events:
