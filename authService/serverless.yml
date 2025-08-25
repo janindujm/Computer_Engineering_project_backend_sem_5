@@ -25,6 +25,13 @@ functions:
           method: post
           cors: true
 
+  confirmSignUp:
+    handler: handlers/confirmSignUp.confirmSignUp
+    events:
+      - http:
+          path: confirm
+          method: post
+
 resources:
   Resources:
     UsersTable:
