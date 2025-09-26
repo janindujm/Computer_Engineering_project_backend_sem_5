@@ -1,0 +1,87 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: greet
+
+service: deviceService
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - iot:CreateThing
+        - iot:CreateKeysAndCertificate
+        - iot:AttachPolicy
+        - iot:AttachThingPrincipal
+        - "iot:ListThingPrincipals"   # ✅ Add this
+        - "iot:DetachThingPrincipal"  # ✅ Add this
+        - "iot:DeleteThing"           # ✅ Add this
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+        - dynamodb:Query
+      Resource:
+        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/esp_devices
+
+  environment:
+    DEVICES_TABLE: esp_devices
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+
+functions:
+  addNewDevice:
+    handler: handlers/addNewDevice.addNewDevice
+    events:
+      - http:
+          path: add-device
+          method: post
+          cors: true
+  updateDevice:
+    handler: handlers/updateDevice.updateDevice
+    events:
+      - http:
+          path: update-device
+          method: put
+          cors: true
+  deleteDevice:
+    handler: handlers/deleteDevice.deleteDevice
+    events:
+      - http:
+          path: delete-device
+          method: delete
+          cors: true
+
+
+resources:
+  Resources:
+    EspDevicesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: esp_devices
+        AttributeDefinitions:
+          - AttributeName: deviceId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: deviceId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    IoTPolicy:
+      Type: AWS::IoT::Policy
+      Properties:
+        PolicyName: MyIoTPolicy
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - "iot:Connect"
+                - "iot:Publish"
+                - "iot:Subscribe"
+                - "iot:Receive"
+              Resource: "*"

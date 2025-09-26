@@ -32,4 +32,12 @@ functions:
       - httpApi:
           path: /devices/day
           method: get
+
+  getUsageSummary:
+    handler: handlers/getUsageSummary.getUsageSummary
+    events:
+      - httpApi:
+          path: /devices/summary
+          method: post
+
           

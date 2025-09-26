@@ -48,9 +48,11 @@ exports.signUp = async (event) => {
 
         //return client response with success message
         return {
-            statusCode: 200, //HTTP status code for created resource
+            statusCode: 200,
             body: JSON.stringify({
-                message: "User signed up successfully, Please Verify your email", //Success message
+                success: true,
+                message: "User registered successfully",
+                requiresEmailVerification: true
             }),
         };
         
@@ -58,7 +60,7 @@ exports.signUp = async (event) => {
         return {
             statusCode: 400, //HTTP status code for internal server error
             body: JSON.stringify({
-                message: "Error signing up user", //Error message
+                success: false, //Error message
                 error: error.message, //Include the error message from the exception
             }),
         };

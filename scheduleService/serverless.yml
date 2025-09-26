@@ -1,0 +1,86 @@
+org: greet
+service: scheduleService
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    IOT_ENDPOINT: ah2xzj64b7m45-ats.iot.us-east-1.amazonaws.com
+    TURN_ON_LAMBDA_ARN: arn:aws:lambda:us-east-1:010526250202:function:controlService-dev-turnOnDevice
+    TURN_OFF_LAMBDA_ARN: arn:aws:lambda:us-east-1:010526250202:function:controlService-dev-turnOffDevice
+    SCHEDULER_ROLE_ARN: arn:aws:iam::010526250202:role/eventbridge-scheduler-lambda-role
+    SCHEDULE_TABLE_NAME: deviceSchedules
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "iot:Publish"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "scheduler:CreateSchedule"
+        - "scheduler:UpdateSchedule"
+        - "scheduler:DeleteSchedule"
+        - "scheduler:ListSchedules"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "iam:PassRole"
+      Resource: "arn:aws:iam::010526250202:role/eventbridge-scheduler-lambda-role"
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:Query"
+        - "dynamodb:Scan"
+        - "dynamodb:DeleteItem"
+      Resource: "*"
+
+functions:
+  createSchedule:
+    handler: handlers/createDeviceSchedule.createDeviceSchedule
+    events:
+      - http:
+          path: create-schedule
+          method: post
+          cors: true
+
+  listDeviceSchedule:
+    handler: handlers/listDeviceSchedule.listDeviceSchedule
+    events:
+      - http:
+          path: list-device-schedules
+          method: post
+          cors: true
+  
+  deleteScheduleByName:
+    handler: handlers/deleteScheduleByName.deleteScheduleByName
+    events:
+      - http:
+          path: delete-schedule
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    DeviceSchedulesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: deviceSchedules
+        AttributeDefinitions:
+          - AttributeName: scheduleName
+            AttributeType: S
+          - AttributeName: deviceId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: scheduleName
+            KeyType: HASH        # Partition Key
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: deviceId-index
+            KeySchema:
+              - AttributeName: deviceId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
